@@ -84,28 +84,6 @@ def launch_setup(context, *args, **kwargs):
                     {"use_intra_process_comms": LaunchConfiguration("use_intra_process")}
                 ],
             ),
-            ComposableNode(
-                package="traffic_light_visualization",
-                plugin="traffic_light::TrafficLightRoiVisualizerNodelet",
-                name="traffic_light_roi_visualizer",
-                parameters=[create_parameter_dict("enable_fine_detection")],
-                remappings=[
-                    ("~/input/image", LaunchConfiguration("input/image")),
-                    ("~/input/rois", LaunchConfiguration("output/rois")),
-                    ("~/input/rough/rois", "detection/rough/rois"),
-                    (
-                        "~/input/traffic_signals",
-                        LaunchConfiguration("output/traffic_signals"),
-                    ),
-                    ("~/output/image", "debug/rois"),
-                    ("~/output/image/compressed", "debug/rois/compressed"),
-                    ("~/output/image/compressedDepth", "debug/rois/compressedDepth"),
-                    ("~/output/image/theora", "debug/rois/theora"),
-                ],
-                extra_arguments=[
-                    {"use_intra_process_comms": LaunchConfiguration("use_intra_process")}
-                ],
-            ),
         ],
         output="both",
     )
