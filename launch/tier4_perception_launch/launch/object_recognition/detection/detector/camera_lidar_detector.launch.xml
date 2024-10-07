@@ -41,6 +41,16 @@
   <arg name="output/ml_detector/objects"/>
   <arg name="output/rule_detector/objects"/>
 
+  <include file="$(find-pkg-share autoware_tensorrt_yolox)/launch/yolox.launch.xml">
+    <arg name="input/image" value="$(var input/camera0/image)"/>
+    <arg name="output/objects" value="/perception/object_recognition/detection/rois"/>
+  </include>
+
+  <include file="$(find-pkg-share bytetrack)/launch/bytetrack.launch.xml">
+    <arg name="detection_rect" value="/perception/object_recognition/detection/yolox/rois"/>
+    <arg name="tracked_rect" value="/perception/object_recognition/detection/rois"/>
+  </include>
+
   <!-- Jetson AGX -->
   <!-- <include file="$(find-pkg-share autoware_tensorrt_yolox)/launch/multiple_yolox.launch.xml">
     <arg name="image_raw0" value="$(var input/camera0/image)"/>
