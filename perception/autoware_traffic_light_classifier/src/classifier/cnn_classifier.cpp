@@ -56,8 +56,15 @@ CNNClassifier::CNNClassifier(rclcpp::Node * node_ptr) : node_ptr_(node_ptr)
   batch_size_ = input_dim.d[0];
 
   autoware::tensorrt_common::BatchConfig batch_config{batch_size_, batch_size_, batch_size_};
+  const size_t max_workspace_size = 1 << 30;
+  const std::string calibration_images = "";
+  autoware::tensorrt_common::BuildConfig build_config("MinMax", -1, false, false, false, 0.0);
+  const bool cuda = node_ptr_->declare_parameter("preprocess_on_gpu", false);
+  const int64_t openmp_num_threads = node_ptr_->declare_parameter("openmp_num_threads", -1);
+
   classifier_ = std::make_unique<autoware::tensorrt_classifier::TrtClassifier>(
-    model_file_path, precision, batch_config, mean_, std_);
+    model_file_path, precision, batch_config, mean_, std_, max_workspace_size, calibration_images,
+    build_config, cuda, openmp_num_threads);
   if (node_ptr_->declare_parameter("build_only", false)) {
     RCLCPP_INFO(node_ptr_->get_logger(), "TensorRT engine is built and shutdown node.");
     rclcpp::shutdown();

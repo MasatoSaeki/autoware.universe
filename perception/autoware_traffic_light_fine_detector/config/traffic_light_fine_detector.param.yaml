@@ -6,3 +6,5 @@
     fine_detector_score_thresh: 0.3
     fine_detector_nms_thresh: 0.65
     gpu_id: 0
+    preprocess_on_gpu: true
+    openmp_num_threads: -1

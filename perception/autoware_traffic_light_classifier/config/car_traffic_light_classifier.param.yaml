@@ -9,3 +9,5 @@
     backlight_threshold: 0.85
     classifier_type: 1 #classifier_type {hsv_filter: 0, cnn: 1}
     classify_traffic_light_type: 0 #classify_traffic_light_type {car: 0, pedestrian:1}
+    preprocess_on_gpu: false
+    openmp_num_threads: -1

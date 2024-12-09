@@ -51,6 +51,7 @@ public:
    * @param[in] buildConfig configuration including precision, calibration method, dla, remaining
    * fp16 for first layer,  remaining fp16 for last layer and profiler for builder
    * @param[in] cuda whether use cuda gpu for preprocessing
+   * @param[in] openmp_num_threads number of threads for openmp
    */
   TrtClassifier(
     const std::string & model_path, const std::string & precision,
@@ -60,7 +61,7 @@ public:
     const size_t max_workspace_size = (1 << 30), const std::string & calibration_images = "",
     const autoware::tensorrt_common::BuildConfig build_config =
       autoware::tensorrt_common::BuildConfig("MinMax", -1, false, false, false, 0.0),
-    const bool cuda = false);
+    const bool cuda = false, const int64_t openmp_num_threads = -1);
   /**
    * @brief Deconstruct TrtClassifier
    */

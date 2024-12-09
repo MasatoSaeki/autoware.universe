@@ -27,6 +27,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <thread>
 
 static void trimLeft(std::string & s)
 {
@@ -104,7 +105,8 @@ TrtClassifier::TrtClassifier(
   const autoware::tensorrt_common::BatchConfig & batch_config, const std::vector<float> & mean,
   const std::vector<float> & std, const size_t max_workspace_size,
   const std::string & calibration_image_list_path,
-  autoware::tensorrt_common::BuildConfig build_config, const bool cuda)
+  autoware::tensorrt_common::BuildConfig build_config, const bool cuda,
+  const int64_t openmp_num_threads)
 {
   src_width_ = -1;
   src_height_ = -1;
@@ -188,6 +190,21 @@ TrtClassifier::TrtClassifier(
 
   } else {
     m_cuda = false;
+  }
+
+  if (openmp_num_threads > 0) {
+    omp_set_num_threads(openmp_num_threads);
+  } else if (openmp_num_threads == -1) {
+    const auto num_cores = std::thread::hardware_concurrency();
+    if (num_cores > 0) {
+      omp_set_num_threads(num_cores);
+    } else {
+      std::cerr << "failed to get the number of threads, use single thread" << std::endl;
+      omp_set_num_threads(1);
+    }
+  } else {
+    std::cerr << "invalid openmp_num_threads parameter, use single thread" << std::endl;
+    omp_set_num_threads(1);
   }
 }
 
@@ -348,6 +365,7 @@ bool TrtClassifier::doInference(
   const std::vector<cv::Mat> & images, std::vector<int> & results,
   std::vector<float> & probabilities)
 {
+  std::cerr << "OpenMP threads in tensorRT classifier: " << omp_get_max_threads() << std::endl;
   if (!trt_common_->isInitialized()) {
     return false;
   }

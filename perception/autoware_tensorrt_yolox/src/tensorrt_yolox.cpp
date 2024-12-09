@@ -33,6 +33,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <omp.h>
+#include <thread>
 
 namespace
 {
@@ -161,7 +163,7 @@ TrtYoloX::TrtYoloX(
   const uint8_t gpu_id, std::string calibration_image_list_path, const double norm_factor,
   [[maybe_unused]] const std::string & cache_dir,
   const autoware::tensorrt_common::BatchConfig & batch_config, const size_t max_workspace_size,
-  const std::string & color_map_path)
+  const std::string & color_map_path, const int64_t openmp_num_threads)
 : gpu_id_(gpu_id), is_gpu_initialized_(false)
 {
   if (!setCudaDeviceId(gpu_id_)) {
@@ -336,6 +338,21 @@ TrtYoloX::TrtYoloX(
     }
   } else {
     use_gpu_preprocess_ = false;
+  }
+
+  if (openmp_num_threads > 0) {
+    omp_set_num_threads(openmp_num_threads);
+  } else if (openmp_num_threads == -1) {
+    const auto num_cores = std::thread::hardware_concurrency();
+    if (num_cores > 0) {
+      omp_set_num_threads(num_cores);
+    } else {
+      std::cerr << "failed to get the number of threads, use single thread" << std::endl;
+      omp_set_num_threads(1);
+    }
+  } else {
+    std::cerr << "invalid openmp_num_threads parameter, use single thread" << std::endl;
+    omp_set_num_threads(1);
   }
 }
 
@@ -558,6 +575,7 @@ bool TrtYoloX::doInference(
   const std::vector<cv::Mat> & images, ObjectArrays & objects, std::vector<cv::Mat> & masks,
   [[maybe_unused]] std::vector<cv::Mat> & color_masks)
 {
+  std::cout << "OpenMP threads in tensorRT YOLOX : " << omp_get_max_threads() << std::endl;
   if (!setCudaDeviceId(gpu_id_)) {
     return false;
   }
@@ -821,6 +839,7 @@ bool TrtYoloX::doInferenceWithRoi(
 bool TrtYoloX::doMultiScaleInference(
   const cv::Mat & image, ObjectArrays & objects, const std::vector<cv::Rect> & rois)
 {
+  std::cerr << "OpenMP threads in tensorRT YOLOX : " << omp_get_max_threads() << std::endl;
   if (!trt_common_->isInitialized()) {
     return false;
   }

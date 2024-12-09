@@ -84,6 +84,8 @@ public:
    * @param[in] cache_dir unused variable
    * @param[in] batch_config configuration for batched execution
    * @param[in] max_workspace_size maximum workspace for building TensorRT engine
+   * @param[in] color_map_path path for colormap for semantic segmentation
+   * @param[in] openmp_num_threads number of threads for OpenMP
    */
   TrtYoloX(
     const std::string & model_path, const std::string & precision, const int num_class = 8,
@@ -94,7 +96,8 @@ public:
     std::string calibration_image_list_file = std::string(), const double norm_factor = 1.0,
     [[maybe_unused]] const std::string & cache_dir = "",
     const autoware::tensorrt_common::BatchConfig & batch_config = {1, 1, 1},
-    const size_t max_workspace_size = (1 << 30), const std::string & color_map_path = "");
+    const size_t max_workspace_size = (1 << 30), const std::string & color_map_path = "",
+    const int64_t openmp_num_threads = -1);
   /**
    * @brief Deconstruct TrtYoloX
    */

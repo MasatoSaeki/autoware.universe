@@ -92,10 +92,12 @@ TrtYoloXNode::TrtYoloXNode(const rclcpp::NodeOptions & node_options)
   const autoware::tensorrt_common::BatchConfig batch_config{1, 1, 1};
   const size_t max_workspace_size = (1 << 30);
 
+  const int64_t openmp_num_threads = this->declare_parameter<int64_t>("openmp_num_threads");
+
   trt_yolox_ = std::make_unique<tensorrt_yolox::TrtYoloX>(
     model_path, precision, label_map_.size(), score_threshold, nms_threshold, build_config,
     preprocess_on_gpu, gpu_id, calibration_image_list_path, norm_factor, cache_dir, batch_config,
-    max_workspace_size, color_map_path);
+    max_workspace_size, color_map_path, openmp_num_threads);
 
   if (!trt_yolox_->isGPUInitialized()) {
     RCLCPP_ERROR(this->get_logger(), "GPU %d does not exist or is not suitable.", gpu_id);
